@@ -107,7 +107,8 @@ public class LogingMain {
                     }
 
                     //進入記帳系統
-                    AccountManager accountManager = userManager.getCurrentAccountManager();
+                    AccountManager accountManager = new AccountManager();
+                    accountManager.loadFromFile();
 
                     while (true) { 
                         System.out.println("請選擇操作: 1.新增紀錄 2.查看紀錄 3.查詢總額 4.返回");
