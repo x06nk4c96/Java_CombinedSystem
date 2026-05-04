@@ -1,3 +1,4 @@
+import java.time.LocalDate;
 import java.util.Scanner;
 
 public class LogingMain {
@@ -24,16 +25,6 @@ public class LogingMain {
                     System.out.print("輸入密碼: ");
                     String regPassword = scanner.nextLine();
 
-                    if (regUsername.isEmpty()) {
-                        System.out.println("使用者名稱不能為空!");
-                        break;
-                    }
-
-                    if (regPassword.isEmpty()) {
-                        System.out.println("密碼不能為空!");
-                        break;
-                    }
-
                     String regPAsswordConfirm;
 
                     while (true) {
@@ -50,7 +41,7 @@ public class LogingMain {
                     if (userManager.register(regUsername, regPassword)) {
                         System.out.println("註冊成功! 請登入");
                     } else {
-                        System.out.println("使用者已存在!");
+                        System.out.println("註冊失敗!");
                     }
                     userManager.saveToFile(); //註冊後儲存資料
                     break;
@@ -107,10 +98,7 @@ public class LogingMain {
                     }
 
                     //進入記帳系統
-                    AccountManager accountManager = new AccountManager();
-                    accountManager.loadFromFile();
-
-                    while (true) { 
+                    while (true) {
                         System.out.println("請選擇操作: 1.新增紀錄 2.查看紀錄 3.查詢總額 4.返回");
 
                         int sub = scanner.nextInt();
@@ -118,6 +106,20 @@ public class LogingMain {
 
                         switch (sub) {
                             case 1:
+                                LocalDate date = null;
+
+                                while (true) {
+                                    System.out.print("輸入日期 (格式: YYYY-MM-DD): ");
+                                    String dateStr = scanner.nextLine();
+
+                                    try {
+                                        date = LocalDate.parse(dateStr);
+                                        break; //日期解析成功，跳出迴圈
+                                    } catch (Exception e) {
+                                        System.out.println("日期格式錯誤，請重新輸入!");
+                                    }
+                                }
+
                                 System.out.print("金額: ");
                                 double amount = scanner.nextDouble();
                                 scanner.nextLine(); //清除換行符
@@ -128,19 +130,19 @@ public class LogingMain {
                                 System.out.print("說明: ");
                                 String description = scanner.nextLine();
 
-                                accountManager.addTransaction(new Transaction(amount, type,"" ,description, java.time.LocalDate.now()));
+                                userManager.getCurrentAccountManager().addTransaction(new Transaction(amount, type,"" ,description, date));
                                 break;
 
                             case 2:
-                                accountManager.showAll();
+                                userManager.getCurrentAccountManager().showAll();
                                 break;
                             
                             case 3:
-                                System.out.println("總額: " + accountManager.getBalance());
+                                System.out.println("總額: " + userManager.getCurrentAccountManager().getBalance());
                                 break;
 
                             case 4:
-                                accountManager.saveToFile(); //返回前儲存帳本資料
+                                userManager.getCurrentAccountManager().saveToFile(userManager.getCurrentUser()); //返回前儲存帳本資料
                                 break;
                         }
                         if (sub == 4) break; //返回主選單

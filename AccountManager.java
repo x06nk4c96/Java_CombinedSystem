@@ -1,6 +1,8 @@
 import java.io.BufferedReader ;
-import java.io.FileReader ;
-import java.io.FileWriter ;
+import java.io.File ;
+import java.io.FileNotFoundException ;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -130,31 +132,37 @@ class AccountManager {
     }
 
     //將紀錄寫入檔案
-    public void saveToFile() {
+    public void saveToFile(String username) {
         try {
-            FileWriter writer = new FileWriter("data.txt");
-
-            for (Transaction t : list) {
-                writer.write(
-                    t.getDate() + "," + 
-                    t.getType() + "," + 
-                    t.getCategory() + "," + 
-                    t.getAmount() + "," + 
-                    t.description + "\n"
-                );
+            File dir = new File ("data");
+            if (!dir.exists()) {
+                dir.mkdir(); //如果資料夾不存在，則創建
             }
-
-            writer.close();
-            System.out.println("資料已儲存!");
+        
+            try (FileWriter writer = new FileWriter("data/" + username + ".txt")){
+                for (Transaction t : list) {
+                    writer.write(
+                        t.getDate() + "," + 
+                        t.getType() + "," + 
+                        t.getCategory() + "," + 
+                        t.getAmount() + "," + 
+                        t.getDescription() + "\n"
+                    );
+                }
+                System.out.println("資料已儲存!");
+            }
         } catch (IOException e) {
             System.err.println("儲存失敗!");
+            e.printStackTrace();
         }
     }
 
     //從檔案讀取紀錄
-    public void loadFromFile() {
+    public void loadFromFile(String username) {
+        list.clear(); //載入前清空現有紀錄
+
         try {
-            BufferedReader reader = new BufferedReader(new FileReader("data.txt"));
+            BufferedReader reader = new BufferedReader(new FileReader("data/" + username + ".txt"));
             String line;
 
             while ((line = reader.readLine()) != null) {
@@ -171,8 +179,11 @@ class AccountManager {
             }
             reader.close();
             System.out.println("資料已載入!");
+        } catch (FileNotFoundException e) {
+            System.out.println("尚無記帳資料");
         } catch (IOException e) {
             System.err.println("載入失敗!");
+            e.printStackTrace();
         }
     }
 }

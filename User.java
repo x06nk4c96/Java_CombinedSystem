@@ -32,4 +32,8 @@ class User {
     public String getRole() {
         return role;
     }
+
+    public AccountManager getAccountManager() {
+        return accountManager;
+    }
 }

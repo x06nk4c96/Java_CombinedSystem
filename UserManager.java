@@ -14,12 +14,18 @@ class UserManager {
     //註冊
     public boolean register(String username, String password) {
         if (users.containsKey(username)) {
+            System.out.println("使用者已存在!");
             return false; //使用者已存在
         }
 
         String role = "user"; //預設角色為一般使用者
         if ("admin".equals(username)) {
             role = "admin"; //如果使用者名稱是admin，設定角色為管理員
+        }
+
+        if (username.isEmpty() || password.isEmpty()) {
+            System.out.println("使用者名稱和密碼不能為空!");
+            return false; //使用者名稱或密碼不能為空
         }
 
         users.put(username, new User(username, password, role));
@@ -39,13 +45,23 @@ class UserManager {
 
     //登入
     User currentUser; //當前登入的使用者
-    
+
     public boolean login(String username, String password) {
         User user = users.get(username);
 
         if (user == null) {
             System.out.println("使用者不存在");
             return false;
+        }
+
+        //密碼正確
+        if (user.getPassword().equals(password)) {
+            user.failedAttempts = 0;
+            currentUser = user;
+
+            currentUser.getAccountManager().loadFromFile(currentUser.getUsername()); //登入後載入該使用者的記帳資料
+            
+            return true;
         }
 
         //檢查是否被鎖
@@ -61,13 +77,6 @@ class UserManager {
                 user.failedAttempts = 0;
                 System.out.println("帳號已解鎖，請重新登入");
             }
-        }
-
-        //密碼正確
-        if (user.getPassword().equals(password)) {
-            user.failedAttempts = 0;
-            currentUser = user;
-            return true;
         }
 
         //密碼錯誤
@@ -92,13 +101,16 @@ class UserManager {
 
     public AccountManager getCurrentAccountManager() {
         if (currentUser != null) {
-            return currentUser.accountManager;
+            return currentUser.getAccountManager();
         }
         return null;
     }
 
     //登出
     public void logout() {
+        if (currentUser != null) {
+            currentUser.getAccountManager().saveToFile(currentUser.getUsername()); //登出前儲存資料
+        }
         currentUser = null; //登出，清除當前使用者
     }
 

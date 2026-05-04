@@ -31,6 +31,10 @@ class Transaction {
         return type;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
     @Override
     public String toString() {
         return "[" + date + "] " + type + " | " + category + amount + " (" + description + ")";
